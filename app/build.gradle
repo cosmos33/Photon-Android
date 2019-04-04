@@ -1,0 +1,101 @@
+apply plugin: 'com.android.application'
+
+android {
+
+    compileSdkVersion project.compileSdkVersion
+    defaultConfig {
+        applicationId "com.immomo.push.demo"
+        minSdkVersion project.minSdkVersion
+        targetSdkVersion project.targetSdkVersion
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a"
+        }
+    }
+    signingConfigs {
+        //如果想使用陌陌app测试，替换包名、签名
+        debug {
+            storeFile file("debug.keystore")
+        }
+
+        release {
+            storeFile file("debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+            v2SigningEnabled true   // android 5.0-8.0，必须用V2，否则会有安全问题
+            v1SigningEnabled true
+        }
+    }
+    buildTypes {
+        release {
+            proguardFiles 'proguard-rules.pro'
+            //接入SDK需要进行配置的选项
+            manifestPlaceholders = [
+                    //应用的包名
+                    PACKAGE_NAME       : android.defaultConfig.applicationId,
+                    "HUAWEI_PUSH_APPID": "@string/HUAWEI_PUSH_APPID",
+                    "MI_PUSH_APPID"    : "@string/MI_PUSH_APPID",
+                    "MI_PUSH_APPKEY"   : "@string/MI_PUSH_APPKEY",
+                    "OPPO_PUSH_APPKEY" : "@string/OPPO_PUSH_APPKEY",
+                    "OPPO_PUSH_SECRET" : "@string/OPPO_PUSH_SECRET",
+                    "VIVO_PUSH_APPID"  : "@string/VIVO_PUSH_APPID",
+                    "VIVO_PUSH_APPKEY" : "@string/VIVO_PUSH_APPKEY",
+                    //三方push服务是否运行在单独进程，如果是可配置，如 :work
+                    "PUSH_PROCESS"     : ":push"
+            ]
+            signingConfig signingConfigs.release
+        }
+        debug {
+            manifestPlaceholders = [
+                    PACKAGE_NAME       : android.defaultConfig.applicationId,
+                    "HUAWEI_PUSH_APPID": "@string/HUAWEI_PUSH_APPID",
+                    "MI_PUSH_APPID"    : "@string/MI_PUSH_APPID",
+                    "MI_PUSH_APPKEY"   : "@string/MI_PUSH_APPKEY",
+                    "OPPO_PUSH_APPKEY" : "@string/OPPO_PUSH_APPKEY",
+                    "OPPO_PUSH_SECRET" : "@string/OPPO_PUSH_SECRET",
+                    "VIVO_PUSH_APPID"  : "@string/VIVO_PUSH_APPID",
+                    "VIVO_PUSH_APPKEY" : "@string/VIVO_PUSH_APPKEY",
+                    //三方push服务是否运行在单独进程，如果是可配置，如 :work
+                    "PUSH_PROCESS"     : ":push"
+            ]
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+    sourceSets.main {
+        jniLibs.srcDir 'src/main/jniLibs'
+        jni.srcDirs = []
+    }
+
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.android.support:appcompat-v7:$appcompatVersion"
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+
+//    PUSH_SDK_GROUP=com.cosmos
+//    PUSH_SDK_ARTIFACT_ID=photon-push
+//    PUSH_SDK_VERSION=2.0.0
+    implementation "com.cosmos.photon:push:2.0.0"
+//    implementation project(':push_lib')
+
+    //可任意选择三方push的接入，如果不想使用某一类厂商，不添加即可
+    implementation "com.cosmos.photon:thirdpush-xiaomi:2.0.0"
+    implementation "com.cosmos.photon:thirdpush-huawei:2.0.0"
+    implementation "com.cosmos.photon:thirdpush-oppo:2.0.0"
+    implementation "com.cosmos.photon:thirdpush-vivo:2.0.0"
+
+}

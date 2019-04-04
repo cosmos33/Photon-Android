@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Photon Push</string>
+
+    <!--华为push APPID配置-->
+    <string name="HUAWEI_PUSH_APPID">1023563</string>
+    <!--小米APPID和APPKEY配置-->
+    <string name="MI_PUSH_APPID">2882303761517123881</string>
+    <string name="MI_PUSH_APPKEY">5221712367881</string>
+    <!--OPPO push APPKEY和APPKEY配置-->
+    <string name="OPPO_PUSH_APPKEY">6FIZKhkAepkg8EcDqYiFQh3X</string>
+    <string name="OPPO_PUSH_SECRET">wxsIp7JXlUzjd8BHoXxymoN9</string>
+
+    <!--VIVO push -->
+    <string name="VIVO_PUSH_APPID">10462</string>
+    <string name="VIVO_PUSH_APPKEY">237e1161-5672-423d-a1cd-7cda01fa13a5</string>
+</resources>
