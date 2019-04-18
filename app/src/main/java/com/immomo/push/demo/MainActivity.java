@@ -45,10 +45,15 @@ public class MainActivity extends AppCompatActivity implements MyApplication.Pus
     }
 
     @Override
-    public void onReceiveToken(String token) {
-        if (!isFinishing()) {
-            tokenTv.setText("token:" + token);
-        }
+    public void onReceiveToken(final String token) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (!isFinishing()) {
+                    tokenTv.setText("token:" + token);
+                }
+            }
+        });
     }
 
     @Override

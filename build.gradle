@@ -16,9 +16,7 @@ allprojects {
         google()
         jcenter()
 
-        maven { url 'https://cosmos1602.bintray.com/cosmos/' }
         maven { url 'https://cosmos1602.bintray.com/photon/' }
-
         maven { url 'http://developer.huawei.com/repo' }//华为push
 
     }

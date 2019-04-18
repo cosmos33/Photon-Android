@@ -86,11 +86,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-//    PUSH_SDK_GROUP=com.cosmos
-//    PUSH_SDK_ARTIFACT_ID=photon-push
-//    PUSH_SDK_VERSION=2.0.0
-    implementation "com.cosmos.photon:push:2.0.0"
-//    implementation project(':push_lib')
+    implementation "com.cosmos.photon:push:2.0.1"
 
     //可任意选择三方push的接入，如果不想使用某一类厂商，不添加即可
     implementation "com.cosmos.photon:thirdpush-xiaomi:2.0.0"
