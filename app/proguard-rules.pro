@@ -83,6 +83,7 @@
 -keep class com.cosmos.photon.push.**{*;}
 -keep class com.cosmos.photon.baseim.**{*;}
 -keep interface com.cosmos.photon.push.**{*;}
+-keep class com.immomo.momo.util.jni.Coded {*;}
 
 -keepclasseswithmembernames class * {
   native <methods>;
