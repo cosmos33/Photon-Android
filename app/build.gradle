@@ -12,8 +12,25 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters "armeabi", "armeabi-v7a"
+            abiFilters 'armeabi', 'armeabi-v7a', 'arm64-v8a'
         }
+
+
+        //接入SDK需要进行配置的选项
+        manifestPlaceholders = [
+                //应用的包名
+                PACKAGE_NAME       : android.defaultConfig.applicationId,
+                "HUAWEI_PUSH_APPID": "@string/HUAWEI_PUSH_APPID",
+                "MI_PUSH_APPID"    : "@string/MI_PUSH_APPID",
+                "MI_PUSH_APPKEY"   : "@string/MI_PUSH_APPKEY",
+                "OPPO_PUSH_APPKEY" : "@string/OPPO_PUSH_APPKEY",
+                "OPPO_PUSH_SECRET" : "@string/OPPO_PUSH_SECRET",
+                "VIVO_PUSH_APPID"  : "@string/VIVO_PUSH_APPID",
+                "VIVO_PUSH_APPKEY" : "@string/VIVO_PUSH_APPKEY",
+                "MEIZU_PUSH_APPID" : "@string/MEIZU_PUSH_APPID",
+                "MEIZU_PUSH_APPKEY": "@string/MEIZU_PUSH_APPKEY",
+                "PUSH_PROCESS"     : ":push"
+        ]
     }
     signingConfigs {
         //如果想使用陌陌app测试，替换包名、签名
@@ -30,38 +47,16 @@ android {
             v1SigningEnabled true
         }
     }
+
     buildTypes {
         release {
+            minifyEnabled true
+            zipAlignEnabled true
             proguardFiles 'proguard-rules.pro'
-            //接入SDK需要进行配置的选项
-            manifestPlaceholders = [
-                    //应用的包名
-                    PACKAGE_NAME       : android.defaultConfig.applicationId,
-                    "HUAWEI_PUSH_APPID": "@string/HUAWEI_PUSH_APPID",
-                    "MI_PUSH_APPID"    : "@string/MI_PUSH_APPID",
-                    "MI_PUSH_APPKEY"   : "@string/MI_PUSH_APPKEY",
-                    "OPPO_PUSH_APPKEY" : "@string/OPPO_PUSH_APPKEY",
-                    "OPPO_PUSH_SECRET" : "@string/OPPO_PUSH_SECRET",
-                    "VIVO_PUSH_APPID"  : "@string/VIVO_PUSH_APPID",
-                    "VIVO_PUSH_APPKEY" : "@string/VIVO_PUSH_APPKEY",
-                    //三方push服务是否运行在单独进程，如果是可配置，如 :work
-                    "PUSH_PROCESS"     : ":push"
-            ]
+
             signingConfig signingConfigs.release
         }
         debug {
-            manifestPlaceholders = [
-                    PACKAGE_NAME       : android.defaultConfig.applicationId,
-                    "HUAWEI_PUSH_APPID": "@string/HUAWEI_PUSH_APPID",
-                    "MI_PUSH_APPID"    : "@string/MI_PUSH_APPID",
-                    "MI_PUSH_APPKEY"   : "@string/MI_PUSH_APPKEY",
-                    "OPPO_PUSH_APPKEY" : "@string/OPPO_PUSH_APPKEY",
-                    "OPPO_PUSH_SECRET" : "@string/OPPO_PUSH_SECRET",
-                    "VIVO_PUSH_APPID"  : "@string/VIVO_PUSH_APPID",
-                    "VIVO_PUSH_APPKEY" : "@string/VIVO_PUSH_APPKEY",
-                    //三方push服务是否运行在单独进程，如果是可配置，如 :work
-                    "PUSH_PROCESS"     : ":push"
-            ]
             signingConfig signingConfigs.debug
         }
     }
@@ -86,12 +81,13 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
-    implementation "com.cosmos.photon:push:2.0.1"
+    implementation "com.cosmos.photon:push:$pushVersion"
 
-    //可任意选择三方push的接入，如果不想使用某一类厂商，不添加即可
-    implementation "com.cosmos.photon:thirdpush-xiaomi:2.0.0"
-    implementation "com.cosmos.photon:thirdpush-huawei:2.0.0"
-    implementation "com.cosmos.photon:thirdpush-oppo:2.0.0"
-    implementation "com.cosmos.photon:thirdpush-vivo:2.0.0"
+//    //可任意选择三方push的接入，如果不想使用某一类厂商，不添加即可
+    implementation "com.cosmos.photon:thirdpush-xiaomi:$pushVersion"
+    implementation "com.cosmos.photon:thirdpush-huawei:$pushVersion"
+    implementation "com.cosmos.photon:thirdpush-oppo:$pushVersion"
+    implementation "com.cosmos.photon:thirdpush-vivo:$pushVersion"
+    implementation "com.cosmos.photon:thirdpush-meizu:$pushVersion"
 
 }

@@ -89,7 +89,7 @@
   native <methods>;
 }
 -keep class com.mm.mmfile.core.**{*;}
--keep class com.immomo.mdlog.**{*;}
+-keep class com.cosmos.mdlog.**{*;}
 
 #OPPO
 -keep public class * extends android.app.Service
@@ -113,3 +113,10 @@
 -keep class com.huawei.hms.**{*;}
 -keep class com.huawei.android.hms.agent.**{*;}
 -keep class com.huawei.gamebox.plugin.gameservice.**{*;}
+#魅族
+-keep class com.meizu.cloud.pushsdk.** { *; }
+-dontwarn  com.meizu.cloud.pushsdk.**
+-keep class com.meizu.nebula.** { *; }
+-dontwarn com.meizu.nebula.**
+-keep class com.meizu.push.** { *; }
+-dontwarn com.meizu.push.**
