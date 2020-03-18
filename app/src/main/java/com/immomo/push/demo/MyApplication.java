@@ -16,10 +16,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.cosmos.photon.push.PhotonPushManager;
+import com.cosmos.photon.push.PushMessageReceiver;
 import com.cosmos.photon.push.log.LogUtil;
 import com.cosmos.photon.push.msg.MoMessage;
 import com.cosmos.photon.push.notification.MoNotify;
-import com.cosmos.photon.push.PushMessageReceiver;
 
 import java.io.File;
 import java.util.List;
@@ -32,10 +32,7 @@ public class MyApplication extends Application {
     public static final String APP_ID = "26e61d33cefc4e2cab629715b6aa260f";
 
     private static String token;
-
-    public static final String NOTIFICATION_CHANNEL_ID_DEFAULT = "com.immomo.momo.notification.default";
-    public static final String NOTIFICATION_CHANNEL_ID_MSG = "com.immomo.momo.notification.msg";
-    public static final String NOTIFICATION_CHANNEL_ID_OTHERS = "com.immomo.momo.notification.others";
+    private boolean showNotifyFromMe = false;//业务方自己控制通知展示
 
     @Override
     public void onCreate() {
@@ -48,24 +45,17 @@ public class MyApplication extends Application {
         }
 
         preferences = getSharedPreferences("demo_prefs", Context.MODE_MULTI_PROCESS);
-
-        // 如果targetSdkVersion >= 26, 则CHANNEL_MODE必须设置为true
         PhotonPushManager.CHANNEL_MODE = true;
 
-        // 如果targetSdkVersion >= 26，客户端需创建NotificationChannel
-        createDefaultChannel(this);
-        createMSGChannel(this);
-        createOtherChannel(this);
 
         // init sdk
         PhotonPushManager.getInstance().init(this, APP_ID, new PushMessageReceiver() {
 
             @Override
             public boolean onNotificationShow(MoNotify notify) {
-                // 如果targetSdkVersion >= 26，发push必须指定channelId，可在服务端指定，也可在此处由客户端指定；
-                // 如果不指定channelId，通知栏将无法展示
-                if (TextUtils.isEmpty(notify.channelId)) {
-                    notify.channelId = NOTIFICATION_CHANNEL_ID_DEFAULT;
+                if (showNotifyFromMe) {
+                    NotifyHelper.sendNotifi(MyApplication.this, notify);
+                    return true;
                 }
                 return super.onNotificationShow(notify);
             }
@@ -85,6 +75,7 @@ public class MyApplication extends Application {
 
             @Override
             public void onCommand(int type, int result, String message) {
+                Log.i(MyApplication.class.getSimpleName(), String.format("onCommand type=%d result=%d message=%s", type, result, message));
             }
 
             @Override
@@ -132,7 +123,99 @@ public class MyApplication extends Application {
         if (!TextUtils.isEmpty(currentUserId)) {
             PhotonPushManager.getInstance().registerWithAlias(currentUserId);
         }
+        createMSGChannel(this);
+        createDefaultChannel(this);
+        createOtherChannel(this);
 
+    }
+
+    public static final String NOTIFICATION_CHANNEL_ID_DEFAULT = "notification.default";
+    public static final String NOTIFICATION_CHANNEL_ID_MSG = "notification.msg";
+    public static final String NOTIFICATION_CHANNEL_ID_OTHERS = "notification.others";
+
+    void createDefaultChannel(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return;
+        }
+        NotificationManager nm = (NotificationManager) context.getSystemService(
+                NOTIFICATION_SERVICE);
+
+        NotificationChannel notificationChannel = nm.getNotificationChannel(NOTIFICATION_CHANNEL_ID_DEFAULT);
+        if (null == notificationChannel) {
+            notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID_DEFAULT, "默认通知", NotificationManager.IMPORTANCE_DEFAULT);
+            notificationChannel.setDescription("消息推送默认通知类别");
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.BLUE);
+            notificationChannel.enableVibration(true);
+            notificationChannel.setVibrationPattern(new long[]{50, 100});
+
+            nm.createNotificationChannel(notificationChannel);
+        }
+        logChannelInfo(notificationChannel);
+    }
+
+    private void logChannelInfo(NotificationChannel notificationChannel) {
+        CharSequence name = notificationChannel.getName();
+        int importance = notificationChannel.getImportance();
+        Uri sound = notificationChannel.getSound();
+        long[] vibrationPattern = notificationChannel.getVibrationPattern();
+        boolean shouldVibrate = notificationChannel.shouldVibrate();
+        Log.i("channel config", "name:" + name);
+        Log.i("channel config", "importance:" + importance);
+        Log.i("channel config", "sound:" + sound);
+        if (vibrationPattern != null && vibrationPattern.length != 0) {
+            for (long l : vibrationPattern) {
+                Log.i("channel config", "vibrationPattern:" + l);
+            }
+        }
+        Log.i("channel config", "shouldVibrate:" + shouldVibrate);
+    }
+
+    void createMSGChannel(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return;
+        }
+        NotificationManager nm = (NotificationManager) context.getSystemService(
+                NOTIFICATION_SERVICE);
+
+        NotificationChannel notificationChannel = nm.getNotificationChannel(NOTIFICATION_CHANNEL_ID_MSG);
+        if (null == notificationChannel) {
+            notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID_MSG, "新消息通知", NotificationManager.IMPORTANCE_HIGH);
+            notificationChannel.setDescription("收到新消息时使用的通知类别");
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.BLUE);
+            notificationChannel.enableVibration(true);
+            notificationChannel.setVibrationPattern(new long[]{50, 100});
+
+            notificationChannel.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.ms2), new AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .build());
+
+
+            nm.createNotificationChannel(notificationChannel);
+        }
+        logChannelInfo(notificationChannel);
+    }
+
+    void createOtherChannel(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return;
+        }
+        NotificationManager nm = (NotificationManager) context.getSystemService(
+                NOTIFICATION_SERVICE);
+
+        NotificationChannel notificationChannel = nm.getNotificationChannel(NOTIFICATION_CHANNEL_ID_OTHERS);
+        if (null == notificationChannel) {
+            notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID_OTHERS, "其他通知", NotificationManager.IMPORTANCE_LOW);
+            notificationChannel.setDescription("其他不重要消息的通知类别");
+            notificationChannel.enableLights(true);
+            notificationChannel.setLightColor(Color.BLUE);
+            notificationChannel.enableVibration(false);
+
+            nm.createNotificationChannel(notificationChannel);
+        }
+        logChannelInfo(notificationChannel);
     }
 
     public static String getUserId() {
@@ -174,71 +257,6 @@ public class MyApplication extends Application {
 
     public static String getPushToken() {
         return token;
-    }
-
-    public static void createDefaultChannel(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return;
-        }
-        NotificationManager nm = (NotificationManager) context.getSystemService(
-                NOTIFICATION_SERVICE);
-
-        NotificationChannel notificationChannel = nm.getNotificationChannel(NOTIFICATION_CHANNEL_ID_DEFAULT);
-        if (null == notificationChannel) {
-            notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID_DEFAULT, "默认通知", NotificationManager.IMPORTANCE_DEFAULT);
-            notificationChannel.setDescription("消息推送默认通知类别");
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.BLUE);
-            notificationChannel.enableVibration(true);
-            notificationChannel.setVibrationPattern(new long[]{50, 100});
-
-            nm.createNotificationChannel(notificationChannel);
-        }
-    }
-
-    void createMSGChannel(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return;
-        }
-        NotificationManager nm = (NotificationManager) context.getSystemService(
-                NOTIFICATION_SERVICE);
-
-        NotificationChannel notificationChannel = nm.getNotificationChannel(NOTIFICATION_CHANNEL_ID_MSG);
-        if (null == notificationChannel) {
-            notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID_MSG, "新消息通知", NotificationManager.IMPORTANCE_HIGH);
-            notificationChannel.setDescription("收到新消息时使用的通知类别");
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.BLUE);
-            notificationChannel.enableVibration(true);
-            notificationChannel.setVibrationPattern(new long[]{50, 100});
-
-            notificationChannel.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/" + R.raw.ms2), new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .build());
-
-
-            nm.createNotificationChannel(notificationChannel);
-        }
-    }
-
-    void createOtherChannel(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return;
-        }
-        NotificationManager nm = (NotificationManager) context.getSystemService(
-                NOTIFICATION_SERVICE);
-
-        NotificationChannel notificationChannel = nm.getNotificationChannel(NOTIFICATION_CHANNEL_ID_OTHERS);
-        if (null == notificationChannel) {
-            notificationChannel = new NotificationChannel(NOTIFICATION_CHANNEL_ID_OTHERS, "其他通知", NotificationManager.IMPORTANCE_LOW);
-            notificationChannel.setDescription("其他不重要消息的通知类别");
-            notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.BLUE);
-            notificationChannel.enableVibration(false);
-
-            nm.createNotificationChannel(notificationChannel);
-        }
     }
 
 

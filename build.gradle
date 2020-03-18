@@ -28,7 +28,7 @@ allprojects {
         targetSdkVersion = 26
         appcompatVersion = "24.2.1"
 
-        pushVersion = '2.1.0'
+        pushVersion = '2.1.8'
     }
 }
 
